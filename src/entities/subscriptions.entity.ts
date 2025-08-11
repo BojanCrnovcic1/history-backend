@@ -34,6 +34,9 @@ export class Subscriptions {
   })
   paymentStatus: "paid" | "pending" | "failed" | null;
 
+  @Column('varchar', { name: 'paypal_order_id', length: 255, nullable: true })
+  paypalOrderId?: string | null;
+
   @ManyToOne(() => Users, (users) => users.subscriptions, {
     onDelete: "NO ACTION",
     onUpdate: "NO ACTION",

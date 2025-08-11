@@ -49,6 +49,13 @@ export class Users {
   @Column("datetime", { name: "subscription_expires_at", nullable: true })
   subscriptionExpiresAt: Date | null;
 
+  @Column("tinyint", {
+    name: "is_verified",
+    width: 1,
+    default: () => "'0'",
+  })
+  isVerified: boolean;
+
   @Column("timestamp", {
     name: "created_at",
     nullable: true,
