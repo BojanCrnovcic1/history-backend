@@ -2,8 +2,8 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } f
 import { Users } from "src/entities/users.entity";
 import { ApiResponse } from "src/misc/api.response.class";
 import { UsersService } from "./users.service";
-import { RequestResetDto } from "./dto/request.reset.dto";
 import { ConfirmResetDto } from "./dto/confirm.reset.dto";
+import { RequestResetDto } from "./dto/request.reset.dto";
 
 @Controller('api/users')
 export class UsersController {
@@ -35,6 +35,7 @@ export class UsersController {
     async confirmReset(@Body() dto: ConfirmResetDto) {
         return await this.usersService.confirmPasswordReset(dto.email, dto.code, dto.newPassword);
     }
+
 
     @Patch(':id/change-role')
     async changeUserRole(@Param('id') userId: number): Promise<Users | ApiResponse> {

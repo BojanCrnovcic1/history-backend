@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
 import { JwtService } from '../auth/jwt.service';
 
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Users, PasswordResetRequests]),
@@ -21,6 +22,7 @@ import { JwtService } from '../auth/jwt.service';
         signOptions: { expiresIn: '30m' },
       }),
     }),
+    
   ],
   controllers: [UsersController],
   providers: [

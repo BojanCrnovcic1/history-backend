@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { UploadMediaDto } from './dto/upload.media.dto';
 import { ApiResponse } from 'src/misc/api.response.class';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from './multer.config';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('api/media')
@@ -11,6 +13,8 @@ export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
+  @Roles('ADMIN')
   @UseInterceptors(FileInterceptor('file', multerConfig))
   async upload(
     @UploadedFile() file: Express.Multer.File,
@@ -23,6 +27,8 @@ export class MediaController {
   }
 
   @Delete(':mediaId')
+  @UseGuards(AuthGuard)
+  @Roles('ADMIN')
   async delete(@Param('mediaId') mediaId: number): Promise<ApiResponse> {
     return await this.mediaService.delete(mediaId);
   }

@@ -13,6 +13,7 @@ import { MailService } from '../users/mail.service';
 import { UsersService } from 'src/users/users.service';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
+import { AuthGuard } from './auth.guard';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { LocalStrategy } from './local.strategy';
     AuthMiddleware,
     MailService,
     UsersService,
+    AuthGuard
   ],
   exports: [
     AuthService,
@@ -44,6 +46,7 @@ import { LocalStrategy } from './local.strategy';
     AuthMiddleware,
     JwtStrategy,
     LocalStrategy,
+    AuthGuard,
   ],
 })
 export class AuthModule {}
