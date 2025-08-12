@@ -1,4 +1,4 @@
-import { IsString, IsOptional, Length } from 'class-validator';
+import { IsString, IsOptional, Length, IsInt } from 'class-validator';
 
 export class CreateTimePeriodDto {
   @IsString()
@@ -14,4 +14,12 @@ export class CreateTimePeriodDto {
   @IsString()
   @Length(1, 50)
   endYear?: string;
+
+  @IsOptional()
+  @IsInt()
+  parentTimePeriodId?: number | null;
+
+  @IsOptional()
+  @IsString()
+  description?: string | null;
 }

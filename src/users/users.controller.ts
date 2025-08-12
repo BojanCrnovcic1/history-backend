@@ -4,12 +4,18 @@ import { ApiResponse } from "src/misc/api.response.class";
 import { UsersService } from "./users.service";
 import { ConfirmResetDto } from "./dto/confirm.reset.dto";
 import { RequestResetDto } from "./dto/request.reset.dto";
+import { PaginateUsersDto } from "./dto/paginate.users.dto";
 
 @Controller('api/users')
 export class UsersController {
     constructor(
         private readonly usersService: UsersService
     ) {}
+
+    @Get("paginate")
+    async paginateUsers(@Query() query: PaginateUsersDto) {
+        return this.usersService.paginateAndSearch(query);
+    };
 
     @Get()
     async allUsers(): Promise<Users[]> {

@@ -11,6 +11,7 @@ import { JwtService } from "src/auth/jwt.service";
 import { MailService } from "./mail.service";
 import { ConfigService } from "@nestjs/config";
 import { PasswordResetRequests } from "src/entities/password-reset-requests.entity";
+import { PaginateUsersDto } from "./dto/paginate.users.dto";
 
 @Injectable()
 export class UsersService {
@@ -22,6 +23,46 @@ export class UsersService {
         private readonly configService: ConfigService,
     ) {}
 
+    async paginateAndSearch(params: PaginateUsersDto) {
+        const { page = 1, limit = 10, username, email, role, isPremium, sortBy, sortOrder = "ASC" } = params;
+      
+        const qb = this.usersRepository
+          .createQueryBuilder("user")
+          .leftJoinAndSelect("user.subscriptions", "subscriptions");
+
+        if (username) {
+          qb.andWhere("user.username LIKE :username", { username: `%${username}%` });
+        }
+        if (email) {
+          qb.andWhere("user.email LIKE :email", { email: `%${email}%` });
+        }
+        if (role) {
+          qb.andWhere("user.role = :role", { role });
+        }
+        if (typeof isPremium === "boolean") {
+          qb.andWhere("user.isPremium = :isPremium", { isPremium });
+        }
+      
+        const validSortColumns = ["username", "email", "createdAt", "role", "isPremium"];
+        const sortColumn = sortBy && validSortColumns.includes(sortBy) ? sortBy : "createdAt";
+
+        qb.orderBy(`user.${sortColumn}`, sortOrder.toUpperCase() === "DESC" ? "DESC" : "ASC")
+          .skip((page - 1) * limit)
+          .take(limit);
+      
+        const [data, total] = await qb.getManyAndCount();
+      
+        return {
+          data,
+          meta: {
+            total,
+            page,
+            lastPage: Math.ceil(total / limit),
+            limit,
+          },
+        };
+    };
+            
     async all(): Promise<Users[]> {
         return await this.usersRepository.find({
             relations: ['subscriptions']
