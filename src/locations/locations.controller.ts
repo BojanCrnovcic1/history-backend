@@ -16,6 +16,11 @@ export class LocationsController {
     return this.locationsService.getLocationsWithEventsGeoJSON();
   };
 
+  @Get()
+  async getAllLocations(): Promise<Locations[]> {
+    return this.locationsService.getAllLocations()
+  };
+
   @Post()
   @UseGuards(AuthGuard)
   @Roles('ADMIN')

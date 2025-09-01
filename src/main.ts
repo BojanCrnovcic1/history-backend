@@ -12,6 +12,8 @@ async function bootstrap() {
   });
 
   app.use('/webhook/stripe', express.raw({ type: 'application/json' }));
+
+  app.enableCors();
  
   await app.listen(process.env.PORT ?? 3000);
 }

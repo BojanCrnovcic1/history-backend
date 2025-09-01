@@ -55,6 +55,12 @@ export class LocationsService {
     );
   }
 
+  async getAllLocations(): Promise<Locations[]> {
+    return await this.locationRepository.find({
+      relations: ['events']
+    })
+  }
+
   async createLocation(dto: CreateLocationDto): Promise<Locations | ApiResponse> {
     const location = this.locationRepository.create(dto);
     await this.locationRepository.save(location);

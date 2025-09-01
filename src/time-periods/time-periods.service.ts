@@ -25,7 +25,7 @@ export class TimePeriodsService {
   async roots(): Promise<TimePeriods[]> {
     return await this.timePeriodsRepo.find({
       where: { parentTimePeriodId: IsNull() },
-      relations: ['children']
+      relations: ['children', 'children.events.location', 'children.events.eventType', 'children.events.media']
     });
   }
 

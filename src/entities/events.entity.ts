@@ -54,7 +54,7 @@ export class Events {
   updatedAt: Date | null;
 
   @ManyToOne(() => TimePeriods, (timePeriods) => timePeriods.events, {
-    onDelete: "NO ACTION",
+    onDelete: "CASCADE",
     onUpdate: "NO ACTION",
   })
   @JoinColumn([
@@ -63,19 +63,19 @@ export class Events {
   timePeriod: TimePeriods;
 
   @ManyToOne(() => EventTypes, (eventTypes) => eventTypes.events, {
-    onDelete: "NO ACTION",
+    onDelete: "CASCADE",
     onUpdate: "NO ACTION",
   })
   @JoinColumn([{ name: "event_type_id", referencedColumnName: "eventTypeId" }])
   eventType: EventTypes;
 
   @ManyToOne(() => Locations, (locations) => locations.events, {
-    onDelete: "NO ACTION",
+    onDelete: "CASCADE",
     onUpdate: "NO ACTION",
   })
   @JoinColumn([{ name: "location_id", referencedColumnName: "locationId" }])
   location: Locations;
 
-  @OneToMany(() => Media, (media) => media.event, {cascade: true})
+  @OneToMany(() => Media, (media) => media.event, {cascade: true, onDelete: 'CASCADE'})
   media: Media[];
 }

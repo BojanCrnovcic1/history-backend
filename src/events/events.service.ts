@@ -18,6 +18,36 @@ export class EventsService {
         })
     }
 
+    async allEventsPaginated(
+        page: number = 1,
+        limit: number = 10,
+        eventTypeId ? : number,
+        timePeriodId ? : number,
+      ): Promise < {
+        data: Events[],
+        total: number
+      } > {
+        const whereClause: any = {};
+    
+        if (eventTypeId) {
+          whereClause.eventTypeId = eventTypeId;
+        }
+        if (timePeriodId) {
+          whereClause.timePeriodId = timePeriodId;
+        }
+    
+        const [events, total] = await this.eventsRepository.findAndCount({
+          where: whereClause,
+          relations: ['timePeriod', 'eventType', 'location', 'media'],
+          take: limit,
+          skip: (page - 1) * limit,
+        });
+        return {
+          data: events,
+          total: total
+        };
+      }
+
     async eventById(eventId: number): Promise<Events | ApiResponse> {
         const event = await this.eventsRepository.findOne({
             where: {eventId: eventId},
@@ -32,15 +62,21 @@ export class EventsService {
     async create(createEventDto: CreateEventDto): Promise<Events | ApiResponse> {
         try {
           const event = this.eventsRepository.create(createEventDto);
-          await this.eventsRepository.save(event);
+          const saved = await this.eventsRepository.save(event);
       
-          return new ApiResponse('success', 201, 'Event successfully created.');
+          return {
+            status: 'success',
+            statusCode: 201,
+            message: 'Event successfully created.',
+            data: saved,   // 🔥 ovdje vraćaš ceo event, uključujući eventId
+          };
         } catch (error) {
           throw new BadRequestException(
             new ApiResponse('error', -2002, 'Failed to create event.'),
           );
         }
-    }
+      }
+      
       
     async update(eventId: number, dto: UpdateEventDto): Promise<ApiResponse> {
         const event = await this.eventById(eventId);

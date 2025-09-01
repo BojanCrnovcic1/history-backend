@@ -26,6 +26,24 @@ import { Roles } from 'src/auth/roles.decorator';
       const isPremium = status === 'true';
       return await this.eventsService.setPremiumForAll(isPremium);
     }
+
+    @Get('filtered')
+  async getEventsPaginatedAndFiltered(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('eventTypeId') eventTypeId ? : string,
+    @Query('timePeriodId') timePeriodId ? : string,
+  ): Promise < {
+    data: Events[],
+    total: number
+  } > {
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const eventType = eventTypeId ? parseInt(eventTypeId, 10) : undefined;
+    const timePeriod = timePeriodId ? parseInt(timePeriodId, 10) : undefined;
+
+    return await this.eventsService.allEventsPaginated(pageNumber, limitNumber, eventType, timePeriod);
+  }
   
     @Get()
     async getAllEvents(): Promise<Events[]> {
@@ -45,29 +63,25 @@ import { Roles } from 'src/auth/roles.decorator';
     }
   
     @Patch(':id')
-    @UseGuards(AuthGuard)
-    @Roles('ADMIN')
+   
     async updateEvent(@Param('id') eventId: number, @Body() dto: UpdateEventDto): Promise<ApiResponse> {
       return await this.eventsService.update(eventId, dto);
     }
   
     @Patch(':id/mark-premium')
-    @UseGuards(AuthGuard)
-    @Roles('ADMIN')
+   
     async markAsPremium(@Param('id') eventId: number): Promise<ApiResponse> {
       return await this.eventsService.markAsPremium(eventId);
     }
   
     @Patch(':id/unmark-premium')
-    @UseGuards(AuthGuard)
-    @Roles('ADMIN')
+   
     async unmarkPremium(@Param('id') eventId: number): Promise<ApiResponse> {
       return await this.eventsService.unmarkPremium(eventId);
     }
   
     @Delete(':id')
-    @UseGuards(AuthGuard)
-    @Roles('ADMIN')
+    
     async deleteEvent(@Param('id') eventId: number): Promise<ApiResponse> {
       return await this.eventsService.removeEvent(eventId);
     }

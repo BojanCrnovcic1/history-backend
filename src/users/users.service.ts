@@ -139,11 +139,10 @@ export class UsersService {
           return new ApiResponse('error', -1001, 'User not found!');
         }
       
-        const passwordHash = crypto.createHash('sha512');
-        passwordHash.update(newPassword);
-        const passwordHashString = passwordHash.digest('hex').toUpperCase();
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
       
-        user.passwordHash = passwordHashString;
+        user.passwordHash = hashedPassword;
         await this.usersRepository.save(user);
       
         resetRequest.isUsed = true;
