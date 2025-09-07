@@ -9,8 +9,6 @@ import { ApiResponse } from "src/misc/api.response.class";
 import { UsersService } from "src/users/users.service";
 import { ConfigService } from '@nestjs/config';
 
-
-
 @Controller('auth')
 export class AuthController {
     constructor(

@@ -14,6 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { VisitsModule } from './visits/visits.module';
 
 @Module({
   imports: [
@@ -46,10 +47,12 @@ import { WebhookModule } from './webhook/webhook.module';
     AuthModule,
     SubscriptionsModule,
     WebhookModule,
+    VisitsModule,
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    
     consumer.apply(AuthMiddleware)
             .exclude('auth/*')
             .forRoutes('api/*');
