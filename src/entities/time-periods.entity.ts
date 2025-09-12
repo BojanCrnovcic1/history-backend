@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Events } from "./events.entity";
+import { TimePeriodTranslation } from "./time-periods_translation.entity";
 
 @Entity("time_periods", { schema: "history" })
 export class TimePeriods {
@@ -34,4 +35,7 @@ export class TimePeriods {
 
   @OneToMany(() => Events, (events) => events.timePeriod)
   events: Events[];
+
+  @OneToMany(() => TimePeriodTranslation, (t) => t.timePeriod, { cascade: true })
+  translations?: TimePeriodTranslation[];
 }

@@ -6,6 +6,8 @@ import { Repository, In, IsNull } from "typeorm";
 import { CreateTimePeriodDto } from "./dto/create.time.period.dto";
 import { UpdateTimePeriodDto } from "./dto/update.time.period.dto";
 import { Events } from "src/entities/events.entity";
+import { TimePeriodTranslationDto } from "./dto/time.period.translation.dto";
+import { TimePeriodTranslation } from "src/entities/time-periods_translation.entity";
 
 @Injectable()
 export class TimePeriodsService {
@@ -18,27 +20,70 @@ export class TimePeriodsService {
 
   async all(): Promise<TimePeriods[]> {
     return await this.timePeriodsRepo.find({
-      relations: ['children', 'events']
+      relations: ['children', 'events', 'translations']
     });
   }
 
   async roots(): Promise<TimePeriods[]> {
     return await this.timePeriodsRepo.find({
       where: { parentTimePeriodId: IsNull() },
-      relations: ['children', 'children.events.location', 'children.events.eventType', 'children.events.media']
+      relations: ['translations', 'children', 'children.events.location', 'children.events.eventType', 'children.events.media', 'children.events.translations']
     });
   }
 
   async byId(timePeriodId: number): Promise<TimePeriods | ApiResponse> {
     const timePeriod = await this.timePeriodsRepo.findOne({
       where: { timePeriodId },
-      relations: ['children', 'events', 'parent']
+      relations: ['children', 'events', 'parent', 'translations']
     });
     if (!timePeriod) {
       return new ApiResponse('error', -4001, 'Time period not found!');
     }
     return timePeriod;
   }
+
+  async allWithTranslation(lang: string): Promise<any[]> {
+
+    const timePeriods = await this.timePeriodsRepo.find({
+      relations: ["translations"],
+    });
+  
+    return timePeriods.map((tp) => {
+      const translations = tp.translations ?? [];
+      const translation = translations.find((t) => t.language === lang);
+  
+      return {
+        timePeriodId: tp.timePeriodId,
+        name: translation?.name || tp.name,
+        startYear: translation?.startYear || tp.startYear,
+        endYear: translation?.endYear || tp.endYear,
+        description: translation?.description || tp.description,
+      };
+    });
+  }
+  
+  
+
+  async byIdWithTranslation(timePeriodId: number, lang: string): Promise<any> {
+    const tp = await this.timePeriodsRepo.findOne({
+      where: { timePeriodId },
+      relations: ["translations"],
+    });
+  
+    if (!tp) return new ApiResponse("error", -4001, "Time period not found!");
+  
+    const translations = tp.translations ?? [];
+  
+    const translation = translations.find((t) => t.language === lang);
+  
+    return {
+      timePeriodId: tp.timePeriodId,
+      name: translation?.name || tp.name,
+      startYear: translation?.startYear || tp.startYear,
+      endYear: translation?.endYear || tp.endYear,
+      description: translation?.description || tp.description,
+    };
+  }   
 
   async create(createTimePeriodData: CreateTimePeriodDto): Promise<TimePeriods | ApiResponse> {
     const tp = this.timePeriodsRepo.create(createTimePeriodData as TimePeriods); 
@@ -49,6 +94,51 @@ export class TimePeriodsService {
       return new ApiResponse('error', -4003, 'Time period could not be saved.');
     }
   }
+
+  async addOrUpdateTranslation(
+    timePeriodId: number,
+    dto: TimePeriodTranslationDto
+  ): Promise<ApiResponse> {
+    const tp = await this.timePeriodsRepo.findOne({
+      where: { timePeriodId },
+      relations: ["translations"],
+    });
+  
+    if (!tp) {
+      return new ApiResponse("error", -4001, "Time period not found!");
+    }
+  
+    let translation = tp.translations?.find(
+      (t) => t.language === dto.language
+    ) || null;
+  
+    if (translation) {
+      // update postojećeg
+      translation.name = dto.name;
+      translation.startYear = dto.startYear;
+      translation.endYear = dto.endYear;
+      translation.description = dto.description;
+    } else {
+      // kreiramo novi ENTITET
+      const newTranslation = this.timePeriodsRepo.manager.create(
+        TimePeriodTranslation,
+        {
+          ...dto,
+          timePeriod: tp,
+        }
+      ) as TimePeriodTranslation;
+  
+      if (!tp.translations) {
+        tp.translations = [];
+      }
+      tp.translations.push(newTranslation);
+    }
+  
+    await this.timePeriodsRepo.save(tp);
+  
+    return new ApiResponse("success", 200, "Translation added/updated.");
+  }
+  
   
   async update(timePeriodId: number, updateTimePeriodData: UpdateTimePeriodDto): Promise<TimePeriods | ApiResponse> {
     const tpOrResp = await this.byId(timePeriodId);
@@ -67,7 +157,7 @@ export class TimePeriodsService {
   async remove(timePeriodId: number): Promise<ApiResponse> {
     const tp = await this.timePeriodsRepo.findOne({
       where: { timePeriodId },
-      relations: ['children', 'events']
+      relations: ['children', 'events', 'translations']
     });
     if (!tp) return new ApiResponse('error', -4001, 'Time period not found!');
     await this.timePeriodsRepo.remove(tp);
@@ -102,7 +192,7 @@ export class TimePeriodsService {
     const ids = await this.getAllDescendantIds(rootId);
     return this.eventsRepo.find({
       where: { timePeriodId: In(ids) },
-      relations: ['media', 'location', 'timePeriod'] 
+      relations: ['media', 'location', 'timePeriod', 'translations'] 
     });
   }
 }

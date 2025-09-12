@@ -11,6 +11,7 @@ import { TimePeriods } from "./time-periods.entity";
 import { EventTypes } from "./event-types.entity";
 import { Locations } from "./locations.entity";
 import { Media } from "./media.entity";
+import { EventTranslation } from "./event-translation.entity";
 
 @Index("event_type_id", ["eventTypeId"], {})
 @Index("location_id", ["locationId"], {})
@@ -78,4 +79,7 @@ export class Events {
 
   @OneToMany(() => Media, (media) => media.event, {cascade: true, onDelete: 'CASCADE'})
   media: Media[];
+
+  @OneToMany(() => EventTranslation, (t) => t.event, { cascade: true })
+  translations?: EventTranslation[]; 
 }

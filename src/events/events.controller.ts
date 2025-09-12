@@ -16,6 +16,7 @@ import { Events } from 'src/entities/events.entity';
 import { ApiResponse } from 'src/misc/api.response.class';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { AddTranslationDto } from './dto/add.translation.dto';
   
   @Controller('api/events')
   export class EventsController {
@@ -49,18 +50,36 @@ import { Roles } from 'src/auth/roles.decorator';
     async getAllEvents(): Promise<Events[]> {
       return await this.eventsService.allEvents();
     }
+
+    @Get("with-translation")
+    async allWithTranslation(@Query("lang") lang: string) {
+      return this.eventsService.allWithTranslation(lang || "sr");
+    }
   
     @Get(':id')
     async getEventById(@Param('id') eventId: number): Promise<Events|ApiResponse> {
       return await this.eventsService.eventById(eventId);
     }
-  
+
+    @Get(':id/translate')
+    async getEventTranslation(@Param('id') id: number, @Query('lang') lang: string
+    ) {
+      return this.eventsService.byIdWithTranslation(Number(id), lang || 'sr');
+    }
+   
     @Post()
     @UseGuards(AuthGuard)
     @Roles('ADMIN')
     async createEvent(@Body() dto: CreateEventDto): Promise<Events | ApiResponse> {
       return await this.eventsService.create(dto);
     }
+
+    @Post(':id/translation')
+    async addEventTranslation(@Param('id') eventId: number,@Body() dto: AddTranslationDto,
+    ): Promise<ApiResponse> {
+       return await this.eventsService.addTranslation(eventId, dto);
+    }
+
   
     @Patch(':id')
    
