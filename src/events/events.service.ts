@@ -157,8 +157,8 @@ export class EventsService {
         }
 
         Object.assign(event, dto);
-        await this.eventsRepository.save(event);
-        return new ApiResponse('success', 200, 'Event successfully updated.');
+        const updated = await this.eventsRepository.save(event);
+        return new ApiResponse('success', 200, 'Event successfully updated.', updated);
       }
     
     async markAsPremium(eventId: number): Promise<ApiResponse> {
